@@ -13,6 +13,8 @@ int main(int argc, char* argv[]){
 			"	./server 127.0.0.1 8000\n";
 			return EXIT_FAILURE;
 	}
-	HTTPServer serv(argv[1], argv[2]);
-	serv.run();
+
+	HTTPServer::setup(argv[1], argv[2]);
+	HTTPServer::run();
 }
+

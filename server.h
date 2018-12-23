@@ -18,14 +18,13 @@ namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 
 
 // Generic http_server
-class HTTPServer {
-public:
-	HTTPServer(char * addr_, char * port_);
+namespace HTTPServer {
+
+	void setup(char * addr_, char * port_);
 
 	// Start serving requests
 	void run();
 
-private:
 	//NOTE: these are moved into run()
 	// // io context needed for everything boost/networking
 	// boost::asio::io_context ioc;
@@ -35,15 +34,15 @@ private:
 
 	// Mapping of api endpoint to a function
 	// the /api/version<num>/ is implicit and not stored
-	static std::unordered_map<std::string, std::unique_ptr<API_Endpoint>> handlers;
+	extern std::unordered_map<std::string, std::unique_ptr<API_Endpoint>> handlers;
 
 
 	// Address from which the server will run
-	boost::asio::ip::address addr;
+	extern boost::asio::ip::address addr;
 
 	// Port from which the server will listen
-	unsigned short port;
+	extern unsigned short port;
 
-};
+}
 
 #endif // SERVER_H
