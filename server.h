@@ -20,10 +20,16 @@ namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 // Generic http_server
 namespace HTTPServer {
 
+	// Acts as the 'constructor'
 	void setup(char * addr_, char * port_);
 
 	// Start serving requests
 	void run();
+
+	// Route requests (TODO? move to Endpoint namespace?)
+	// where does it make the most sense to have?
+	void route(tcp::socket& sock);
+
 
 	//NOTE: these are moved into run()
 	// // io context needed for everything boost/networking
