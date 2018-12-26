@@ -31,3 +31,8 @@
 *.out
 *.app
 server
+
+# Crypto things, just in case
+cert.pem
+dh.pem
+key.pem
