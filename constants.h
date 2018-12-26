@@ -8,6 +8,7 @@ namespace constant {
 
 	const std::string API_VERSION = "v1";
 	const std::string API_ROOT = "/api/" + API_VERSION + "/";
+	
 }
 
 #endif // CONSTANTS_H
