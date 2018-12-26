@@ -1,7 +1,6 @@
 CC			= g++
-LDFLAGS		= -L/home/alex/boost/include -pthread
-CFLAGS		= -I/home/alex/boost/include -c -g -Wall
-# TODO, define header for server.cpp so we can compile server.cpp separate from main
+LDFLAGS		= -L/home/alex/boost/lib -pthread -lssl -lcrypto
+CFLAGS		= -I/home/alex/boost/include -c -g -Wall 
 SOURCES		= server_main.cpp server.cpp endpoints/example.cpp
 OBJECTS		= $(SOURCES:.cpp=.o)
 EXECUTABLE	= server
@@ -9,7 +8,7 @@ EXECUTABLE	= server
 all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
 
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@

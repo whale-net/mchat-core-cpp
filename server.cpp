@@ -43,6 +43,9 @@ void HTTPServer::route(tcp::socket& sock){
 void HTTPServer::run(){
 	boost::asio::io_context ioc{1};
 	tcp::acceptor acceptor{ioc, {addr, port}};
+
+	ssl::context ctx{ssl::context::sslv23};
+
 	while (true){
 		// block until new client request
 		tcp::socket socket{ioc};

@@ -9,12 +9,13 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ssl.hpp>
 
 #include "endpoints/endpoint.h"
 
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
-
+namespace ssl = boost::asio::ssl;		// from <boos/asio/ssl.hpp>
 
 
 // Generic http_server
