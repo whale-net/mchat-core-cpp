@@ -1,5 +1,5 @@
 #include "server.h"
-
+#include "cert.h"
 #include "endpoints/example.h"
 
 
@@ -44,7 +44,8 @@ void HTTPServer::run(){
 	boost::asio::io_context ioc{1};
 	tcp::acceptor acceptor{ioc, {addr, port}};
 
-	ssl::context ctx{ssl::context::sslv23};
+	ssl::context ssl_ctx{ssl::context::sslv23};
+	load_cert(ssl_ctx);
 
 	while (true){
 		// block until new client request
