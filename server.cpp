@@ -68,6 +68,7 @@ void HTTPServer::prepare_request(tcp::socket& sock, ssl::context& ssl_ctx){
 
 	// loop and read into buffer
 	beast::flat_buffer buffer;
+	bool close = false;
 	while (true){
 		http::request<http::string_body> req;
 		http::read(stream, buffer, req, ec);
@@ -81,15 +82,15 @@ void HTTPServer::prepare_request(tcp::socket& sock, ssl::context& ssl_ctx){
 			return log_error(ec, "reading request");
 		}
 
-		route(std::move(req), std::ref(stream), ec);
+		route(std::move(req), std::ref(stream), ec, close);
 
 		if (ec) {
 			return log_error(ec, "writing response");
 		}
-		// TODO:
 		// handle Connection: close semantic
-		// unsure what it entails, but could implement if I copy example
-
+		if (close){
+			break;
+		}
 	}	
 
 	//sock.shutdown(tcp::socket::shutdown_send);
@@ -100,12 +101,33 @@ void HTTPServer::prepare_request(tcp::socket& sock, ssl::context& ssl_ctx){
 // TODO template this, may be uncessary depeding on request type
 void HTTPServer::route(http::request<http::string_body>&& req,
 						   ssl::stream<tcp::socket&>& stream,
-						   beast::error_code& ec){
-	http::serializer<true, http::string_body> sr{req};
+						   beast::error_code& ec,
+						   bool& close){
+	// Determine if we should close socket after write
+	close = req.need_eof();
 
+	auto const bad_request =
+    [&req](beast::string_view why)
+    {
+        http::response<http::string_body> res{http::status::bad_request, req.version()};
+        // res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+        res.set(http::field::content_type, "text/html");
+        res.keep_alive(req.keep_alive());
+        res.body() = why.to_string();
+        res.prepare_payload();
+        return res;
+	};
+
+
+	http::response<http::string_body> res = bad_request("it work");
+
+	// because this needs to be templated our send function
+	// cannot be lambda
+	http::serializer<false, http::string_body> sr{res}; //Note: cannot serialize in place
 	// this will be placed in handlers most likely
 	// have to consider best way to send
 	// could yoink send_lambda but I think there will be a better way
+	// inline function?
 	http::write(stream, sr, ec);
 }
 
