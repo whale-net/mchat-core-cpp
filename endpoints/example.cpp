@@ -5,7 +5,6 @@
 #include "example.h"
 
 void endpoint::Example::handle(std::string request){
-	std::cout << "HANDLING" << std::endl;
 	if (boost::algorithm::equals(request, "POST"))
 		handle_POST();
 	else

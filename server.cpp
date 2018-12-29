@@ -1,3 +1,9 @@
+#include <iostream>
+#include <thread>
+
+#include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
+
 #include "server.h"
 #include "cert.h"
 #include "endpoints/example.h"
@@ -18,6 +24,12 @@ namespace HTTPServer {
 	unsigned short port;
 }
 
+// https://github.com/boostorg/beast/blob/develop/example/http/server/sync-ssl/http_server_sync_ssl.cpp#L208
+// will change to more robust logging later
+void HTTPServer::log(beast::error_code ec, char const* what){
+	std::cerr << what << ":" << ec.message() << "\n"; 	
+}
+
 void HTTPServer::setup(char * addr_, char * port_){
 	addr = boost::asio::ip::make_address(addr_);
 	port = static_cast<unsigned short>(std::atoi(port_));
@@ -25,6 +37,9 @@ void HTTPServer::setup(char * addr_, char * port_){
 	// TODO: figure out best way to initialize our endpoints
 	//		 Most important feature is to have it initialized so
 	// 		 we don't have to worry about thread-safety
+	//		 
+	//		 would it be possible to add them in hot? through a subprocess?
+	//		 would not be useful but would be cool
 	handlers.emplace("example", std::make_unique<endpoint::Example>());
 	// handlers["example"]->handle("GET");
 	// handlers["example"]->handle("POST");
@@ -33,8 +48,22 @@ void HTTPServer::setup(char * addr_, char * port_){
 }
 
 void HTTPServer::route(tcp::socket& sock, ssl::context& ssl_ctx){
+	// begin parsing information about request
+	// route to correct endpoint handler
+
+	// Beast error code, !=0 -> error
+	beast::error_code ec;
+
+	// construct stream and perform handshake
+	ssl::stream<tcp::socket&> stream{sock, ssl_ctx};
+	stream.handshake(ssl::stream_base::server, ec);
+	if (ec) {
+		return log(ec, "handshake");
+	}
+
+
 	handlers["example"]->handle("GET");
-	handlers["example"]->handle("POST");
+	// handlers["example"]->handle("POST");
 
 
 	sock.shutdown(tcp::socket::shutdown_send);
