@@ -10,8 +10,10 @@ inline void load_cert(boost::asio::ssl::context& ctx){
 	// openssl dhparam -out dh.pem 2048
 	// openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 10000 -out cert.pem
 	ctx.use_certificate_chain_file("cert.pem");
+	// need this for 
 	ctx.use_private_key_file("key.pem", boost::asio::ssl::context::pem);
-	ctx.use_tmp_dh_file("dh.pem");
+	// this can be disabled
+	ctx.use_tmp_dh_file("dh.pem"); 
 }
 
 
