@@ -28,11 +28,15 @@ namespace HTTPServer {
 	// Start serving requests
 	void run();
 
-	// Route requests (TODO? move to Endpoint namespace?)
-	// where does it make the most sense to have?
-	void route(tcp::socket& sock, ssl::context& ssl_ctx);
+	// Prepare request to be routed
+	void prepare_request(tcp::socket& sock, ssl::context& ssl_ctx);
 
-	void log(beast::error_code ec, char const* what);
+	// route request to proper handler
+	void route(http::request<http::string_body>&& req);
+
+	// generic cerr logging tool
+	void log_error(beast::error_code ec, char const* what);
+
 
 	// Mapping of api endpoint to a function
 	// the /api/version<num>/ is implicit and not stored

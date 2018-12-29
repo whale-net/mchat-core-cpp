@@ -26,7 +26,7 @@ namespace HTTPServer {
 
 // https://github.com/boostorg/beast/blob/develop/example/http/server/sync-ssl/http_server_sync_ssl.cpp#L208
 // will change to more robust logging later
-void HTTPServer::log(beast::error_code ec, char const* what){
+void HTTPServer::log_error(beast::error_code ec, char const* what){
 	std::cerr << what << ":" << ec.message() << "\n"; 	
 }
 
@@ -47,7 +47,10 @@ void HTTPServer::setup(char * addr_, char * port_){
 	
 }
 
-void HTTPServer::route(tcp::socket& sock, ssl::context& ssl_ctx){
+// TODO figure out why it's not socket&&
+// moving should be rvalue but lengthy compiler error
+// unlike route
+void HTTPServer::prepare_request(tcp::socket& sock, ssl::context& ssl_ctx){
 	// begin parsing information about request
 	// route to correct endpoint handler
 
@@ -57,16 +60,45 @@ void HTTPServer::route(tcp::socket& sock, ssl::context& ssl_ctx){
 	// construct stream and perform handshake
 	ssl::stream<tcp::socket&> stream{sock, ssl_ctx};
 	stream.handshake(ssl::stream_base::server, ec);
-	if (ec) {
-		return log(ec, "handshake");
-	}
+	if (ec) return log_error(ec, "handshake");
 
 
-	handlers["example"]->handle("GET");
+	// handlers["example"]->handle("GET");
 	// handlers["example"]->handle("POST");
 
+	// loop and read into buffer
+	beast::flat_buffer buffer;
+	while (true){
+		http::request<http::string_body> req;
+		http::read(stream, buffer, req, ec);
 
-	sock.shutdown(tcp::socket::shutdown_send);
+		// exit condition
+		if(ec == http::error::end_of_stream){
+			break;
+		}
+		// otherwise bad read
+		else if (ec) {
+			return log_error(ec, "reading request");
+		}
+
+		route(std::move(req));
+
+		if (ec) {
+			return log_error(ec, "writing response");
+		}
+		// TODO:
+		// handle Connection: close semantic
+
+	}	
+
+	//sock.shutdown(tcp::socket::shutdown_send);
+	stream.shutdown(ec);
+	if (ec) return log_error(ec, "shutdown");
+}
+
+// TODO template this, may be uncessary depeding on request type
+void HTTPServer::route(http::request<http::string_body>&& req){
+
 }
 
 void HTTPServer::run(){
@@ -85,7 +117,7 @@ void HTTPServer::run(){
 		// Spawn thread on handler
 		// do as little work as possible
 		std::thread{std::bind(
-			&HTTPServer::route,
+			&HTTPServer::prepare_request,
 			std::move(socket),
 			std::ref(ssl_ctx)
 		)}.detach();
