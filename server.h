@@ -32,7 +32,9 @@ namespace HTTPServer {
 	void prepare_request(tcp::socket& sock, ssl::context& ssl_ctx);
 
 	// route request to proper handler
-	void route(http::request<http::string_body>&& req);
+	void route(http::request<http::string_body>&& req,
+				   ssl::stream<tcp::socket&>& stream,
+				   beast::error_code& ec);
 
 	// generic cerr logging tool
 	void log_error(beast::error_code ec, char const* what);

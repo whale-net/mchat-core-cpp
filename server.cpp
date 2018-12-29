@@ -81,13 +81,14 @@ void HTTPServer::prepare_request(tcp::socket& sock, ssl::context& ssl_ctx){
 			return log_error(ec, "reading request");
 		}
 
-		route(std::move(req));
+		route(std::move(req), std::ref(stream), ec);
 
 		if (ec) {
 			return log_error(ec, "writing response");
 		}
 		// TODO:
 		// handle Connection: close semantic
+		// unsure what it entails, but could implement if I copy example
 
 	}	
 
@@ -97,8 +98,15 @@ void HTTPServer::prepare_request(tcp::socket& sock, ssl::context& ssl_ctx){
 }
 
 // TODO template this, may be uncessary depeding on request type
-void HTTPServer::route(http::request<http::string_body>&& req){
+void HTTPServer::route(http::request<http::string_body>&& req,
+						   ssl::stream<tcp::socket&>& stream,
+						   beast::error_code& ec){
+	http::serializer<true, http::string_body> sr{req};
 
+	// this will be placed in handlers most likely
+	// have to consider best way to send
+	// could yoink send_lambda but I think there will be a better way
+	http::write(stream, sr, ec);
 }
 
 void HTTPServer::run(){
