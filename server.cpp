@@ -32,7 +32,7 @@ void HTTPServer::setup(char * addr_, char * port_){
 	
 }
 
-void HTTPServer::route(tcp::socket& sock){
+void HTTPServer::route(tcp::socket& sock, ssl::context& ssl_ctx){
 	handlers["example"]->handle("GET");
 	handlers["example"]->handle("POST");
 
@@ -57,7 +57,8 @@ void HTTPServer::run(){
 		// do as little work as possible
 		std::thread{std::bind(
 			&HTTPServer::route,
-			std::move(socket)
+			std::move(socket),
+			std::ref(ssl_ctx)
 		)}.detach();
 	}
 }

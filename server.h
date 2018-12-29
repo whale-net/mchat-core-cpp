@@ -29,7 +29,7 @@ namespace HTTPServer {
 
 	// Route requests (TODO? move to Endpoint namespace?)
 	// where does it make the most sense to have?
-	void route(tcp::socket& sock);
+	void route(tcp::socket& sock, ssl::context& ssl_ctx);
 
 
 	//NOTE: these are moved into run()
