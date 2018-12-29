@@ -9,6 +9,7 @@ namespace http = beast::http;
 
 // Class for sending messages
 // mimics the send_lambda from https://github.com/boostorg/beast/blob/develop/example/http/server/sync-ssl/http_server_sync_ssl.cpp#L208
+// But I believe moving it to a seperate class can help
 
 namespace HTTPServer {
 
@@ -22,7 +23,7 @@ public:
 	Sender(Stream& out_stream, bool& close, beast::error_code ec);
 
 	template<bool isRequest, class Body>
-	void send(http::message<isRequest, Body>& msg) const;
+	inline void send(http::message<isRequest, Body>& msg) const;
 
 private:
 	// Output stream for writing response
