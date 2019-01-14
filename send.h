@@ -16,21 +16,10 @@ namespace HTTPServer {
 	template<class Stream>
 	class Sender {
 	public:
-		Sender(Stream& out_stream, bool& close, beast::error_code ec){
-			this->out_stream = out_stream;
-			this->close = close;
-			this->ec = ec;
-		}
+		Sender(Stream& out_stream, bool& close, beast::error_code ec);
 
 		template<bool isRequest, class Body>
-		void send(http::message<isRequest, Body>& msg) const {
-			close = msg.need_eof();
-
-			// constify for write
-			http::serializer<isRequest, Body> serial_msg{msg};
-			http::write(out_stream, serial_msg, ec);
-
-		}
+		void send(http::message<isRequest, Body>& msg) const;
 
 	private:
 		// Output stream for writing response

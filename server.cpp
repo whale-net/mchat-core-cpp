@@ -81,8 +81,8 @@ void HTTPServer::prepare_request(tcp::socket& sock, ssl::context& ssl_ctx){
 		else if (ec) {
 			return log_error(ec, "reading request");
 		}
-
-		route(std::move(req), std::ref(stream), ec, close);
+		// TODO: template this function
+		route<http::string_body>(std::move(req), std::ref(stream), ec, close);
 
 		if (ec) {
 			return log_error(ec, "writing response");
@@ -99,7 +99,8 @@ void HTTPServer::prepare_request(tcp::socket& sock, ssl::context& ssl_ctx){
 }
 
 // TODO template this, may be uncessary depeding on request type
-void HTTPServer::route(http::request<http::string_body>&& req,
+template <class Body>
+void HTTPServer::route(http::request<Body>&& req,
 						   ssl::stream<tcp::socket&>& stream,
 						   beast::error_code& ec,
 						   bool& close){
@@ -109,7 +110,7 @@ void HTTPServer::route(http::request<http::string_body>&& req,
 	auto const bad_request =
     [&req](beast::string_view why)
     {
-        http::response<http::string_body> res{http::status::bad_request, req.version()};
+        http::response<Body> res{http::status::bad_request, req.version()};
         // res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
         res.set(http::field::content_type, "text/html");
         res.keep_alive(req.keep_alive());
@@ -119,15 +120,20 @@ void HTTPServer::route(http::request<http::string_body>&& req,
 	};
 
 
-	http::response<http::string_body> res = bad_request("it work");
+	http::response<Body> res = bad_request("it work");
 
 	// because this needs to be templated our send function
 	// cannot be lambda
-	http::serializer<false, http::string_body> sr{res}; //Note: cannot serialize in place
+	http::serializer<false, Body> sr{res}; //Note: cannot serialize in place
 	// this will be placed in handlers most likely
 	// have to consider best way to send
 	// could yoink send_lambda but I think there will be a better way
 	// inline function?
+
+	// this is better than what I have now but will still need work 
+	// in order to generalize it
+	// HTTPServer::Sender<Stream> sender(stream, );
+
 	http::write(stream, sr, ec);
 }
 
