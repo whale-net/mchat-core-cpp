@@ -82,7 +82,7 @@ void HTTPServer::prepare_request(tcp::socket& sock, ssl::context& ssl_ctx){
 			return log_error(ec, "reading request");
 		}
 		// TODO: template this function
-		route<http::string_body>(std::move(req), std::ref(stream), ec, close);
+		route<http::string_body, ssl::stream<tcp::socket&>>(std::move(req), std::ref(stream), ec, close);
 
 		if (ec) {
 			return log_error(ec, "writing response");
@@ -99,9 +99,9 @@ void HTTPServer::prepare_request(tcp::socket& sock, ssl::context& ssl_ctx){
 }
 
 // TODO template this, may be uncessary depeding on request type
-template <class Body>
+template <class Body, class Stream>
 void HTTPServer::route(http::request<Body>&& req,
-						   ssl::stream<tcp::socket&>& stream,
+						   Stream& stream,
 						   beast::error_code& ec,
 						   bool& close){
 	// Determine if we should close socket after write

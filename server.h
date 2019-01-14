@@ -32,11 +32,11 @@ namespace HTTPServer {
 	void prepare_request(tcp::socket& sock, ssl::context& ssl_ctx);
 
 	// route request to proper handler
-	template <class Stream>
-	void route(http::request<Stream>&& req,
-				   ssl::stream<tcp::socket&>& stream,
-				   beast::error_code& ec,
-				   bool& close);
+	template <class Body, class Stream>
+	void route(http::request<Body>&& req,
+							   Stream& stream,
+							   beast::error_code& ec,
+							   bool& close);
 
 	// generic cerr logging tool
 	void log_error(beast::error_code ec, char const* what);
