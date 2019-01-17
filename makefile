@@ -1,7 +1,7 @@
 CC			= g++
 LDFLAGS		= -L/home/alex/boost/lib -pthread -lssl -lcrypto
 CFLAGS		= -I/home/alex/boost/include -c -g -Wall -std=c++14
-SOURCES		= server_main.cpp server.cpp endpoints/example.cpp send.cpp
+SOURCES		= server_main.cpp server.cpp endpoints/example.cpp # send.cpp
 OBJECTS		= $(SOURCES:.cpp=.o)
 EXECUTABLE	= server
 

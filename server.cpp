@@ -6,6 +6,7 @@
 
 #include "server.h"
 #include "cert.h"
+#include "send.h"
 #include "endpoints/example.h"
 
 
@@ -105,8 +106,10 @@ void HTTPServer::route(http::request<Body>&& req,
 						   beast::error_code& ec,
 						   bool& close){
 	// Determine if we should close socket after write
-	close = req.need_eof();
+	// moved to Sender::send
+	// close = req.need_eof();
 
+	// creates a message
 	auto const bad_request =
     [&req](beast::string_view why)
     {
@@ -119,22 +122,24 @@ void HTTPServer::route(http::request<Body>&& req,
         return res;
 	};
 
-
-	http::response<Body> res = bad_request("it work");
-
-	// because this needs to be templated our send function
-	// cannot be lambda
-	http::serializer<false, Body> sr{res}; //Note: cannot serialize in place
-	// this will be placed in handlers most likely
-	// have to consider best way to send
-	// could yoink send_lambda but I think there will be a better way
-	// inline function?
+	http::response<Body> sample_response = bad_request("it work");
 
 	// this is better than what I have now but will still need work 
-	// in order to generalize it
-	// HTTPServer::Sender<Stream> sender(stream, );
+	// in order to generalize it further
+	HTTPServer::Sender<Stream> sender{stream, close, ec};
+	// sender.send(sample_response);
 
-	http::write(stream, sr, ec);
+
+	// // because this needs to be templated our send function
+	// // cannot be lambda
+	// http::serializer<false, Body> sr{res}; //Note: cannot serialize in place
+	// // this will be placed in handlers most likely
+	// // have to consider best way to send
+	// // could yoink send_lambda but I think there will be a better way
+	// // inline function?
+
+
+	// http::write(stream, sr, ec);
 }
 
 void HTTPServer::run(){

@@ -34,3 +34,18 @@ namespace HTTPServer {
 	
 }
 
+
+// TODO: figure out a better way to do this perhaps
+// namespace needed_for_compilation {
+// 	boost::asio::io_context iocy{1};
+// 	// ssl::stream<tcp::socket&> stream{sock, ssl_ctx};
+// 	tcp::socket socky{iocy};
+// 	ssl::context ssl_ctxy{ssl::context::sslv23};
+
+// 	ssl::stream<tcp::socket&> streamy{socky, ssl_ctxy};
+// 	bool closey;
+// 	beast::error_code ecy;
+// 	// TODO
+// 	// uncomment this and fight the error, move sender to server.cpp?
+// 	// HTTPServer::Sender<ssl::stream<tcp::socket&>> _secure_sender{streamy, closey, ecy};
+// }
